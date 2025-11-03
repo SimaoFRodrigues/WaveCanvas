@@ -11,20 +11,37 @@ class AudioProcessor {
 
   async startMicrophone() {
     console.log("Iniciando captura do microfone... (AudioProcessor)");
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const dog = true;
-
-        if (dog) resolve("Cão");
-        else reject("Não Cão");
-      }, 1500);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        console.log("Acesso ao microfone autorizado. Stream:", stream);
+        resolve(stream);
+      } catch (err) {
+        console.error("Erro ao iniciar o microfone:", err);
+        reject(err);
+      }
     });
   }
 
   async loadAudioFile(file) {
     // TODO: carregar ficheiro de áudio
     console.log("Carregando ficheiro de áudio...");
-    // Devolver Promise
+    return new Promise(async (resolve, reject) => {
+      try {
+        const audio = await file;
+        this.audioContext = audioContext.createMediaElementSource(audio);
+        console.log(
+          "Ficheiro carregado com sucesso. Contexo de áudio:",
+          this.audioContext
+        );
+        resolve(this.audioContext);
+      } catch (err) {
+        console.error("Erro ao carregar ficheiro:", err);
+        reject(err);
+      }
+    });
   }
 
   stop() {

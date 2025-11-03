@@ -11,12 +11,12 @@ class App {
   }
 
   init() {
-    // TODO: inicializar a aplicação
     console.log("App inicializada");
   }
 
   startMicrophone() {
     console.log("Iniciando captura do microfone...");
+    this.audioProcessor.startMicrophone();
   }
 
   loadAudioFile(file) {

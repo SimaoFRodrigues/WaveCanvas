@@ -62,6 +62,7 @@ class UIManager {
   setupEventListeners() {
     // TODO: configurar event listeners
     document.getElementById("startMic").addEventListener("click", () => {
+      $("#startMic").prop("disabled", true);
       this.app.startMicrophone();
     });
 
