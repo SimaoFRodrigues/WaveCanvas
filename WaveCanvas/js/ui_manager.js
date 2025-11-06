@@ -60,16 +60,20 @@ class UIManager {
   }
 
   setupEventListeners() {
-    // TODO: configurar event listeners
+    //desabilita os botões
     document.getElementById("startMic").addEventListener("click", () => {
       $("#startMic").prop("disabled", true);
+      $("#stopAudio").prop("disabled", false);
       this.app.startMicrophone();
     });
 
     document.getElementById("stopAudio").addEventListener("click", () => {
+      $("#startMic").prop("disabled", false);
+      $("#stopAudio").prop("disabled", true);
       this.app.stopAudio();
     });
 
+    //o input file muda
     document.getElementById("audioFile").addEventListener("change", (e) => {
       if (e.target.files.length > 0) {
         this.app.loadAudioFile(e.target.files[0]);

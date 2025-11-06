@@ -1,4 +1,4 @@
-// Classe Abstrata Base para Visualizações
+// Classe Abstrata Base para Visualizações, classe pai
 class AudioVisualization {
   constructor(canvas, audioProcessor) {
     if (this.constructor === AudioVisualization) {
@@ -22,7 +22,7 @@ class AudioVisualization {
   }
 
   draw() {
-    throw new Error("Método draw() deve ser implementado pela subclasse.");
+    throw new Error("Método draw() deve ser implementado pela subclasse."); //metodo abstrato
   }
 
   update() {

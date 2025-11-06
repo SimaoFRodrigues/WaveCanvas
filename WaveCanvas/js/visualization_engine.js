@@ -29,19 +29,24 @@ class VisualizationEngine {
   }
 
   setVisualization(type) {
-    // TODO: definir visualização atual
+    this.currentVisualization = type;
     console.log(`Definindo visualização: ${type}`);
-    return false; // Devolver boolean indicando sucesso
+    return false;
   }
 
   start() {
-    // TODO: iniciar animação
     console.log("Iniciando motor de visualização...");
+    this.isRunning = true;
+
+    this.animationId = requestAnimationFrame(() => this.animate());
   }
 
   stop() {
-    // TODO: parar animação
-    console.log("Parando motor de visualização...");
+    if (this.isRunning) {
+      console.log("Parando motor de visualização...");
+      this.isRunning = false;
+      cancelAnimationFrame(this.animationId);
+    }
   }
 
   resize() {
@@ -56,5 +61,17 @@ class VisualizationEngine {
   updateVisualizationProperty(property, value) {
     // TODO: atualizar propriedade da visualização
     console.log(`Atualizando propriedade: ${property} = ${value}`);
+  }
+
+  animate() {
+    if (!this.isRunning) return;
+
+    const viz = this.visualizations.get(this.currentVisualization);
+    if (viz) {
+      viz.update();
+      viz.draw();
+    }
+
+    this.animationId = requestAnimationFrame(() => this.animate());
   }
 }

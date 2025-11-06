@@ -16,21 +16,95 @@ class App {
 
   startMicrophone() {
     console.log("Iniciando captura do microfone...");
-    this.audioProcessor.startMicrophone();
+
+    try {
+      this.uiManager.updateAudioInfo("A iniciar microfone...");
+      this.uiManager.setButtonStates(false);
+
+      this.stopAudio();
+
+      if (this.audioProcessor.audioContext.state === "suspended") {
+        this.audioProcessor.audioContext.resume();
+      }
+
+      this.audioProcessor.mediaStream = this.audioProcessor.startMicrophone();
+      console.log(
+        "Microfone iniciado com sucesso!",
+        this.audioProcessor.mediaStream
+      );
+
+      const spectrumViz =
+        this.visualizationEngine.visualizations.get("spectrum");
+      if (spectrumViz) spectrumViz.audioProcessor = this.audioProcessor;
+
+      const waveformViz =
+        this.visualizationEngine.visualizations.get("waveform");
+      if (waveformViz) waveformViz.audioProcessor = this.audioProcessor;
+
+      const particlesViz =
+        this.visualizationEngine.visualizations.get("particles");
+      if (particlesViz) particlesViz.audioProcessor = this.audioProcessor;
+
+      this.visualizationEngine.start();
+
+      this.uiManager.setButtonStates(true);
+      this.uiManager.updateAudioInfo("Microfone ativo!");
+    } catch (err) {
+      console.error("Falha ao iniciar microfone:", err);
+      this.uiManager.showError(`Erro ao iniciar microfone: ${err.message}`);
+      this.uiManager.setButtonStates(false);
+    }
   }
 
   loadAudioFile(file) {
-    // TODO: carregar ficheiro de áudio
     console.log("Carregando ficheiro de áudio...");
+    try {
+      this.uiManager.updateAudioInfo("A carregar ficheiro...");
+      this.uiManager.setButtonStates(false);
+      this.stopAudio();
+
+      if (this.audioProcessor.audioContext.state === "suspended") {
+        this.audioProcessor.audioContext.resume();
+      }
+
+      this.audioProcessor.mediaStream = this.audioProcessor.loadAudioFile(file);
+
+      const spectrumViz =
+        this.visualizationEngine.visualizations.get("spectrum");
+      if (spectrumViz) spectrumViz.audioProcessor = this.audioProcessor;
+
+      const waveformViz =
+        this.visualizationEngine.visualizations.get("waveform");
+      if (waveformViz) waveformViz.audioProcessor = this.audioProcessor;
+
+      const particlesViz =
+        this.visualizationEngine.visualizations.get("particles");
+      if (particlesViz) particlesViz.audioProcessor = this.audioProcessor;
+
+      if (this.audioProcessor.mediaStream == null) {
+        this.uiManager.showError(
+          "Insucesso no carregamento do ficheiro de áudio."
+        );
+      }
+      console.log(
+        "Ficheiro carregado com sucesso!",
+        this.audioProcessor.mediaStream
+      );
+    } catch (error) {
+      this.uiManager.showError(err);
+    }
   }
 
   stopAudio() {
-    // TODO: parar áudio
+    this.visualizationEngine.stop();
+    if (this.audioProcessor.audioContext.state === "running") {
+      this.audioProcessor.audioContext.suspend();
+    }
     console.log("Parando áudio...");
   }
 
   setVisualization(type) {
-    // TODO: definir tipo de visualização
+    this.visualizationEngine.currentVisualization = type;
     console.log(`Definindo visualização: ${type}`);
   }
 

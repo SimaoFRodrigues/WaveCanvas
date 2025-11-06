@@ -6,8 +6,7 @@ class WaveformVisualization extends AudioVisualization {
   }
 
   draw() {
-    // TODO: desenhar forma de onda
-    this.clearCanvas();
+    //this.clearCanvas();
 
     // Implementação básica para teste
     const data = this.audioProcessor

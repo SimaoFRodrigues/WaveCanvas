@@ -1,70 +1,93 @@
-// Processamento de Áudio
 class AudioProcessor {
   constructor() {
-    this.audioContext = null;
-    this.analyser = null;
+    this.audioContext = new AudioContext();
+    this.analyser = this.audioContext.createAnalyser();
+    this.analyser.fftSize = 2048;
+    this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+    this.waveformData = new Uint8Array(this.analyser.fftSize);
+    this.source = null;
     this.mediaStream = null;
-    this.frequencyData = new Uint8Array();
-    this.waveformData = new Uint8Array();
-    this.isPlaying = false;
   }
 
   async startMicrophone() {
     console.log("Iniciando captura do microfone... (AudioProcessor)");
-    return new Promise(async (resolve, reject) => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        console.log("Acesso ao microfone autorizado. Stream:", stream);
-        resolve(stream);
-      } catch (err) {
-        console.error("Erro ao iniciar o microfone:", err);
-        reject(err);
-      }
-    });
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+        },
+      });
+
+      const source = this.audioContext.createMediaStreamSource(
+        this.mediaStream
+      );
+      source.connect(this.analyser);
+      this.analyser.connect(this.audioContext.destination);
+      this.source = source;
+      console.log("Microfone conectado com sucesso!");
+      return source;
+    } catch (err) {
+      console.error("Erro ao iniciar o microfone:", err);
+      throw err;
+    }
   }
 
   async loadAudioFile(file) {
-    // TODO: carregar ficheiro de áudio
-    console.log("Carregando ficheiro de áudio...");
-    return new Promise(async (resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
       try {
-        const audio = await file;
-        this.audioContext = audioContext.createMediaElementSource(audio);
-        console.log(
-          "Ficheiro carregado com sucesso. Contexo de áudio:",
-          this.audioContext
-        );
-        resolve(this.audioContext);
-      } catch (err) {
-        console.error("Erro ao carregar ficheiro:", err);
-        reject(err);
-      }
-    });
+        const audioData = event.target.result;
+        const audioBuffer = await this.audioContext.decodeAudioData(audioData);
+        const source = this.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(this.analyser);
+        this.analyser.connect(this.audioContext.destination);
+        this.source = source;
+      } catch (err) {}
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   stop() {
-    // TODO: parar processamento de áudio
     console.log("Parando processamento de áudio...");
+
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+    }
+
+    if (this.source && this.source.stop) {
+      this.source.stop();
+    }
+
+    if (this.audioContext) {
+      this.audioContext.suspend();
+    }
   }
 
   update() {
-    // TODO: atualizar dados de áudio
+    if (this.analyser) {
+      this.analyser.getByteFrequencyData(this.frequencyData);
+      this.analyser.getByteTimeDomainData(this.waveformData);
+    }
   }
 
   getFrequencyData() {
-    // TODO: obter dados de frequência
+    if (!this.analyser) return [];
+    this.analyser.getByteFrequencyData(this.frequencyData);
     return this.frequencyData;
   }
 
   getWaveformData() {
-    // TODO: obter dados de forma de onda
-    return this.waveformData;
+    if (!this.analyser) return [];
+    this.analyser.getByteTimeDomainData(this.waveformData);
+    return Array.from(this.waveformData).map((value) => (value - 128) / 128);
   }
 
-  calculateAudioLevel() {
-    // TODO: calcular nível de áudio
-    return 0;
+  calculateAudioLevel(peak, maxAmplitude = 1) {
+    const amplitude = Math.max(peak / maxAmplitude, 1e-10);
+    return 20 * Math.log10(amplitude);
   }
 }
