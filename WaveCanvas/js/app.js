@@ -86,6 +86,9 @@ class App {
           "Insucesso no carregamento do ficheiro de áudio."
         );
       }
+
+      //Dar start ao visualizer
+
       console.log(
         "Ficheiro carregado com sucesso!",
         this.audioProcessor.mediaStream
