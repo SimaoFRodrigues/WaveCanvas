@@ -6,30 +6,38 @@ class WaveformVisualization extends AudioVisualization {
   }
 
   draw() {
-    //this.clearCanvas();
+    this.clearCanvas();
 
-    // Implementação básica para teste
     const data = this.audioProcessor
       ? this.audioProcessor.getWaveformData()
       : this.testData;
-    const sliceWidth = this.canvas.width / data.length;
+
+    if (!data || data.length === 0) return;
+
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    const step = width / (data.length - 1);
 
     this.ctx.beginPath();
-    this.ctx.moveTo(0, this.canvas.height / 2);
 
-    for (let i = 0; i < data.length; i++) {
-      const v = data[i] / 128.0;
-      const y = (v * this.canvas.height) / 2;
-      const x = i * sliceWidth;
+    // Ponto inicial
+    const startX = 0;
+    const startY = (data[0] * height) / 2 + height / 2;
+    this.ctx.moveTo(startX, startY);
 
-      if (i === 0) {
-        this.ctx.moveTo(x, y);
-      } else {
-        this.ctx.lineTo(x, y);
-      }
+    // Desenhar com o uso da interpolação quadrática entre pontos
+    for (let i = 1; i < data.length; i++) {
+      const x = i * step;
+      const y = (data[i] * height) / 2 + height / 2;
+
+      const prevX = (i - 1) * step;
+      const prevY = (data[i - 1] * height) / 2 + height / 2;
+      const cpX = (prevX + x) / 2;
+
+      this.ctx.quadraticCurveTo(cpX, prevY, x, y);
     }
 
-    this.ctx.strokeStyle = "#4cc9f0";
+    this.ctx.strokeStyle = "#4cf054ff";
     this.ctx.lineWidth = 2;
     this.ctx.stroke();
   }

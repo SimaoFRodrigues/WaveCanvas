@@ -87,7 +87,7 @@ class App {
         );
       }
 
-      //Dar start ao visualizer
+      this.visualizationEngine.start();
 
       console.log(
         "Ficheiro carregado com sucesso!",

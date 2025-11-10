@@ -1,6 +1,7 @@
 class AudioProcessor {
   constructor() {
-    this.audioContext = new AudioContext();
+    this.audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     this.analyser = this.audioContext.createAnalyser();
     this.analyser.fftSize = 2048;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
@@ -21,14 +22,11 @@ class AudioProcessor {
         },
       });
 
-      const source = this.audioContext.createMediaStreamSource(
-        this.mediaStream
-      );
-      source.connect(this.analyser);
+      this.source = this.audioContext.createMediaStreamSource(this.mediaStream);
+      this.source.connect(this.analyser);
       this.analyser.connect(this.audioContext.destination);
-      this.source = source;
       console.log("Microfone conectado com sucesso!");
-      return source;
+      return this.source;
     } catch (err) {
       console.error("Erro ao iniciar o microfone:", err);
       throw err;
@@ -41,11 +39,11 @@ class AudioProcessor {
       try {
         const audioData = event.target.result;
         const audioBuffer = await this.audioContext.decodeAudioData(audioData);
-        const source = this.audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(this.analyser);
+        this.source = this.audioContext.createBufferSource();
+        this.source.buffer = audioBuffer;
+        this.source.connect(this.analyser);
         this.analyser.connect(this.audioContext.destination);
-        this.source = source;
+        return this.source;
       } catch (err) {}
     };
     reader.readAsArrayBuffer(file);
@@ -77,6 +75,8 @@ class AudioProcessor {
   getFrequencyData() {
     if (!this.analyser) return [];
     this.analyser.getByteFrequencyData(this.frequencyData);
+    // Array Uint8Array com 1024 valores (0-255)
+    // Cada valor representa a magnitude de uma frequência
     return this.frequencyData;
   }
 
