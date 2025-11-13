@@ -43,6 +43,7 @@ class AudioProcessor {
         this.source.buffer = audioBuffer;
         this.source.connect(this.analyser);
         this.analyser.connect(this.audioContext.destination);
+        this.source.start(0);
         return this.source;
       } catch (err) {}
     };
