@@ -5,6 +5,8 @@
 - **Autores:** Simão Rodrigues e Rodrigo Resa
 - **Data:** 16 de novembro de 2025
 
+- **Link de acesso:** https://simaofrodrigues.github.io/WavCanvas
+
 ![<Sistema de Visualização de Áudio>](screenshot.png)
 
 ## Instruções de Instalação e Uso
